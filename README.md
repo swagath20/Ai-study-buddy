@@ -2,7 +2,7 @@
 
 A Flask web app that transforms raw study notes or uploaded PDF documents into clear, structured summaries and interactive self-testing quizzes — powered by Google's Gemini API (`gemini-3.6-flash`).
 
-🔗 **Live Demo:** [Add your Render URL here]
+🔗 **Live Demo:** https://ai-study-buddy-dezb.onrender.com/generate
 
 ---
 
