@@ -1,23 +1,79 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}AI Study Buddy - Create Study Set{% endblock %}
 
 {% block content %}
-<div class="hero">
-    <h1>Supercharge Your Notes</h1>
-    <p>Paste notes or upload a PDF document to generate an instant summary and self-testing quiz.</p>
+<div class="container">
+    <header class="page-header">
+        <h1>Generate Study Materials</h1>
+        <p>Paste your notes or upload a PDF to create an instant summary and self-testing quiz.</p>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="card form-card">
+        <form action="{{ url_for('generate') }}" method="POST" enctype="multipart/form-data" class="study-form">
+            
+            <div class="form-group">
+                <label for="notes" class="form-label">
+                    <strong>Study Notes / Content</strong>
+                </label>
+                <textarea 
+                    id="notes" 
+                    name="notes" 
+                    rows="8" 
+                    class="form-control" 
+                    placeholder="Paste lecture notes, chapter summaries, or articles here..."></textarea>
+            </div>
+
+            <div class="form-divider">
+                <span>OR</span>
+            </div>
+
+            <div class="form-group file-upload-group">
+                <label for="pdf_file" class="form-label">
+                    <strong>Upload PDF Document</strong>
+                </label>
+                <div class="file-input-wrapper">
+                    <input 
+                        type="file" 
+                        id="pdf_file" 
+                        name="pdf_file" 
+                        accept=".pdf" 
+                        class="file-input">
+                    <small class="form-help">Supported format: <code>.pdf</code> (text-based PDF)</small>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="generate-btn">
+                    <span>⚡ Generate Summary & Quiz</span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<form action="{{ url_for('generate') }}" method="POST" enctype="multipart/form-data" class="study-form" id="studyForm">
-    <div style="margin-bottom: 1.5rem;">
-        <label for="pdf_file" class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Upload PDF Notes (Optional)</label>
-        <input type="file" name="pdf_file" id="pdf_file" accept=".pdf" style="color: var(--text-secondary);">
-    </div>
+<script>
+    // Visual feedback when submitting the form
+    const form = document.querySelector('.study-form');
+    const submitBtn = document.getElementById('generate-btn');
 
-    <label for="notes" class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Or Paste Notes / Content</label>
-    <textarea name="notes" id="notes" rows="8" placeholder="Paste your study notes, textbook excerpt, or lecture transcripts here..."></textarea>
-    
-    <button type="submit" class="btn-submit" id="submitBtn">
-        <span class="btn-text">Generate Summary & Quiz</span>
-        <span class="spinner" id="spinner" style="display: none;">Generating...</span>
-    </button>
-</form>
+    form.addEventListener('submit', function () {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>⏳ Processing & Generating...</span>';
+        submitBtn.style.opacity = '0.7';
+        submitBtn.style.cursor = 'not-allowed';
+    });
+</script>
 {% endblock %}
