@@ -9,7 +9,7 @@ class StudySession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     notes_text = db.Column(db.Text, nullable=False)
     summary = db.Column(db.Text, nullable=False)
-    quiz_json = db.Column(db.Text, nullable=False)  # Stores JSON string of questions/answers
+    quiz_json = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

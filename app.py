@@ -1,9 +1,11 @@
 import os
 import json
+import time
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from google.genai.errors import APIError
 from pypdf import PdfReader
 from models import db, StudySession
 
@@ -77,35 +79,50 @@ def generate():
 
     prompt = build_prompt(notes)
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json"
+    max_retries = 2
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
             )
-        )
 
-        data = json.loads(response.text)
-        summary = data.get('summary', '')
-        quiz = data.get('quiz', [])
+            data = json.loads(response.text)
+            summary = data.get('summary', '')
+            quiz = data.get('quiz', [])
 
-        session_entry = StudySession(
-            notes_text=notes,
-            summary=summary,
-            quiz_json=json.dumps(quiz)
-        )
-        db.session.add(session_entry)
-        db.session.commit()
+            if not summary or not quiz:
+                raise ValueError("Incomplete response structure received.")
 
-        return render_template('results.html', summary=summary, quiz=quiz, session_id=session_entry.id)
+            session_entry = StudySession(
+                notes_text=notes,
+                summary=summary,
+                quiz_json=json.dumps(quiz)
+            )
+            db.session.add(session_entry)
+            db.session.commit()
 
-    except json.JSONDecodeError:
-        flash('Failed to parse AI response. Please try again.', 'error')
-        return redirect(url_for('index'))
-    except Exception as e:
-        flash(f'An error occurred: {str(e)}', 'error')
-        return redirect(url_for('index'))
+            return render_template('results.html', summary=summary, quiz=quiz, session_id=session_entry.id)
+
+        except (json.JSONDecodeError, ValueError):
+            if attempt == max_retries:
+                flash('The model returned an invalid structure. Please try submitting again.', 'error')
+                return redirect(url_for('index'))
+            time.sleep(1)
+
+        except APIError as api_err:
+            if api_err.code == 429:
+                flash('Rate limit reached on the free tier. Please wait a minute and try again.', 'error')
+            else:
+                flash(f'Gemini API error ({api_err.code}): Please try again shortly.', 'error')
+            return redirect(url_for('index'))
+
+        except Exception as e:
+            flash(f'Unexpected error: {str(e)}', 'error')
+            return redirect(url_for('index'))
 
 @app.route('/generate_more_questions/<int:session_id>', methods=['POST'])
 def generate_more_questions(session_id):
