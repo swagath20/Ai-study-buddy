@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="results-layout">
+    <section class="card summary-card">
+        <h2>📝 Key Concepts Summary</h2>
+        <div class="summary-content">
+            <p>{{ summary }}</p>
+        </div>
+        <a href="{{ url_for('index') }}" class="btn-secondary">← Analyze More Notes</a>
+    </section>
+
+    <section class="card quiz-card">
+        <h2>🧠 Knowledge Check</h2>
+        <form id="quizForm" data-session-id="{{ session_id }}">
+            <div id="quizItemsContainer">
+                {% for item in quiz %}
+                {% set q_idx = loop.index0 %}
+                <div class="quiz-item" data-correct="{{ item.correct_answer | trim }}">
+                    <p class="question-text"><strong>Q{{ loop.index }}.</strong> {{ item.question }}</p>
+                    <div class="options-group">
+                        {% for opt in item.options %}
+                        <label class="option-label">
+                            <input type="radio" name="question_{{ q_idx }}" value="{{ opt | trim }}">
+                            <span class="option-box">{{ opt }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="quiz-actions" style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                <button type="button" class="btn-submit" id="checkAnswersBtn">Check Answers</button>
+                <button type="button" class="btn-submit" id="moreQuestionsBtn" style="background-color: #334155;">
+                    <span class="more-btn-text">🔄 New Questions Set</span>
+                    <span class="more-spinner" style="display: none;">Generating...</span>
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

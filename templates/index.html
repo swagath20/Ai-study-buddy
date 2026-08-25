@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero">
+    <h1>Supercharge Your Notes</h1>
+    <p>Paste notes or upload a PDF document to generate an instant summary and self-testing quiz.</p>
+</div>
+
+<form action="{{ url_for('generate') }}" method="POST" enctype="multipart/form-data" class="study-form" id="studyForm">
+    <div style="margin-bottom: 1.5rem;">
+        <label for="pdf_file" class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Upload PDF Notes (Optional)</label>
+        <input type="file" name="pdf_file" id="pdf_file" accept=".pdf" style="color: var(--text-secondary);">
+    </div>
+
+    <label for="notes" class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Or Paste Notes / Content</label>
+    <textarea name="notes" id="notes" rows="8" placeholder="Paste your study notes, textbook excerpt, or lecture transcripts here..."></textarea>
+    
+    <button type="submit" class="btn-submit" id="submitBtn">
+        <span class="btn-text">Generate Summary & Quiz</span>
+        <span class="spinner" id="spinner" style="display: none;">Generating...</span>
+    </button>
+</form>
+{% endblock %}
