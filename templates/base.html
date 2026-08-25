@@ -8,8 +8,12 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-container">
+        <div class="nav-container" style="display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: auto;">
             <a href="{{ url_for('index') }}" class="logo">⚡ AI Study Buddy</a>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" style="color: var(--text-primary); text-decoration: none; margin-right: 1.5rem;">New Note</a>
+                <a href="{{ url_for('history') }}" style="color: var(--text-secondary); text-decoration: none;">History</a>
+            </div>
         </div>
     </nav>
 

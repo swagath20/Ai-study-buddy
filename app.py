@@ -62,7 +62,6 @@ def generate():
     notes = request.form.get('notes', '').strip()
     pdf_file = request.files.get('pdf_file')
 
-    # If PDF is provided, extract its text
     if pdf_file and pdf_file.filename != '':
         try:
             pdf_text = extract_text_from_pdf(pdf_file)
@@ -148,7 +147,6 @@ Return ONLY valid JSON matching this exact structure:
         new_data = json.loads(response.text)
         new_quiz = new_data.get('quiz', [])
 
-        # Update database history
         updated_history = existing_quiz + new_quiz
         session_entry.quiz_json = json.dumps(updated_history)
         db.session.commit()
@@ -157,6 +155,22 @@ Return ONLY valid JSON matching this exact structure:
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/history')
+def history():
+    sessions = StudySession.query.order_by(StudySession.created_at.desc()).all()
+    return render_template('history.html', sessions=sessions)
+
+@app.route('/session/<int:session_id>')
+def view_session(session_id):
+    session_entry = StudySession.query.get_or_404(session_id)
+    quiz = json.loads(session_entry.quiz_json)
+    return render_template(
+        'results.html',
+        summary=session_entry.summary,
+        quiz=quiz,
+        session_id=session_entry.id
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero">
+    <h1>Study History</h1>
+    <p>Revisit your previously generated notes, summaries, and quizzes.</p>
+</div>
+
+<div class="history-list">
+    {% if sessions %}
+        {% for s in sessions %}
+        <div class="card" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="max-width: 75%;">
+                <p style="font-weight: bold; margin-bottom: 0.25rem;">
+                    {{ s.notes_text[:120] }}{% if s.notes_text|length > 120 %}...{% endif %}
+                </p>
+                <small style="color: var(--text-secondary);">Saved on: {{ s.created_at.strftime('%b %d, %Y - %I:%M %p') }}</small>
+            </div>
+            <a href="{{ url_for('view_session', session_id=s.id) }}" class="btn-submit" style="text-decoration: none; font-size: 0.85rem; padding: 0.5rem 1rem;">Review Session →</a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="card" style="text-align: center; color: var(--text-secondary);">
+            <p>No study sessions saved yet. Create your first one from the home page!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
